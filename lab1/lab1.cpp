@@ -62,8 +62,13 @@ void rewriteAnketa()
     std::cin >> num;
 
     SetFilePointer(hfile, sizeof(Anketa) * (num - 1), 0, FILE_BEGIN);
+    std::cout << "Wait for access...\n";
+    OVERLAPPED ol;
+    ol.OffsetHigh = 0;
+    ol.Offset = sizeof(Anketa) * (num - 1);
+    ol.hEvent = NULL;
+    LockFileEx(hfile, LOCKFILE_EXCLUSIVE_LOCK, 0, sizeof(Anketa), 0, &ol);
     ReadFile(hfile, &anketa, sizeof(Anketa), &Bytes, NULL);
-
     std::cout << "The old anketa: \n";
     printAnketa(anketa);
 
@@ -94,6 +99,12 @@ void readAnketa()
     std::cout << "Enter the number of the anketa\n";
     int num;
     std::cin >> num;
+    OVERLAPPED ol;
+    ol.OffsetHigh = 0;
+    ol.Offset = sizeof(Anketa) * (num - 1);
+    ol.hEvent = NULL;
+    std::cout << "Wait for access...\n";
+    LockFileEx(hfile, 0, 0, sizeof(Anketa), 0, &ol);
 
     SetFilePointer(hfile, sizeof(Anketa) * (num - 1), 0, FILE_BEGIN);
 
