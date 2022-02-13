@@ -44,6 +44,40 @@ void printAnketa(Anketa anketa)
     std::cout << "Experience: " << anketa.experience << "\n";
 }
 
+void rewriteAnketa()
+{
+    Anketa anketa;
+
+    HANDLE hfile = CreateFile(L"test_lock.dat",
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL,
+        OPEN_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+
+    std::cout << "Enter the number of the anketa\n";
+    int num;
+    std::cin >> num;
+
+    SetFilePointer(hfile, sizeof(Anketa) * (num - 1), 0, FILE_BEGIN);
+    ReadFile(hfile, &anketa, sizeof(Anketa), &Bytes, NULL);
+
+    std::cout << "The old anketa: \n";
+    printAnketa(anketa);
+
+    std::cout << "Enter the new name:\n";
+    std::cin >> anketa.name;
+    std::cout << "Enter the new age:\n";
+    std::cin >> anketa.age;
+    std::cout << "Enter the new experience:\n";
+    std::cin >> anketa.experience;
+    SetFilePointer(hfile, sizeof(Anketa) * (num - 1), 0, FILE_BEGIN);
+    WriteFile(hfile, &anketa, sizeof(Anketa), &Bytes, NULL);
+    CloseHandle(hfile);
+}
+
 void readAnketa()
 {
     Anketa anketa;
@@ -70,23 +104,6 @@ void readAnketa()
     CloseHandle(hfile);
 }
 
-void clear() {
-    COORD topLeft = { 0, 0 };
-    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO screen;
-    DWORD written;
-
-    GetConsoleScreenBufferInfo(console, &screen);
-    FillConsoleOutputCharacterA(
-        console, ' ', screen.dwSize.X * screen.dwSize.Y, topLeft, &written
-    );
-    FillConsoleOutputAttribute(
-        console, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
-        screen.dwSize.X * screen.dwSize.Y, topLeft, &written
-    );
-    SetConsoleCursorPosition(console, topLeft);
-}
-
 void selectOp(int num)
 {
     switch (num)
@@ -97,6 +114,9 @@ void selectOp(int num)
     case 2:
         readAnketa();
         break;
+    case 3:
+        rewriteAnketa();
+        break;
     default:
         break;
     }
@@ -106,12 +126,12 @@ int main()
 {
     while (true)
     {
-        clear();
-        std::cout << "1.Add the new anketa.\n2.Read the anketa.\n3.Exit.\n";
+        system("cls");
+        std::cout << "1.Add the new anketa.\n2.Read the anketa.\n3.Rewrite the anketa.\n4.Exit.\n";
         int num;
         std::cin >> num;
-        if (num == 3) break;
-        clear();
+        if (num == 4) break;
+        system("cls");
         selectOp(num);
     }
 
